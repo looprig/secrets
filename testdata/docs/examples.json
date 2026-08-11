@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "repository": "secrets",
+  "proofSources": [
+    {
+      "id": "example-secrets-secret-safety-source",
+      "type": "source",
+      "path": "examples/secret-safety/main.go"
+    },
+    {
+      "id": "example-secrets-references-source",
+      "type": "source",
+      "path": "examples/references/main.go"
+    },
+    {
+      "id": "example-secrets-local-store-source",
+      "type": "source",
+      "path": "examples/local-store/main.go"
+    },
+    {
+      "id": "example-secrets-store-contract-test",
+      "type": "test",
+      "path": "examples/contracttest/store_test.go"
+    },
+    {
+      "id": "example-secrets-command-test",
+      "type": "test",
+      "path": "tests/example_test.go"
+    }
+  ],
+  "examples": [
+    {
+      "id": "example-secrets-secret-safety-command",
+      "title": "Keep secret values redacted until explicit consumption",
+      "ecosystem": "go",
+      "owner": "secrets",
+      "sourcePath": "examples/secret-safety/main.go",
+      "availability": "source-workspace",
+      "versions": {
+        "github.com/looprig/secrets": "source-workspace"
+      },
+      "offlineCommand": "GOWORK=off go run ./examples/secret-safety",
+      "assertion": "The secret formats as [REDACTED], remains valid, and Bytes returns an isolated 13-byte copy.",
+      "workflowPath": ".github/workflows/docs-examples.yml",
+      "jobId": "docs-examples",
+      "cleanup": "No persistent resources are created, so no cleanup is required.",
+      "liveGate": null,
+      "proofIds": [
+        "example-secrets-secret-safety-source",
+        "example-secrets-command-test"
+      ]
+    },
+    {
+      "id": "example-secrets-references-command",
+      "title": "Parse canonical references and constrain them with namespaces",
+      "ecosystem": "go",
+      "owner": "secrets",
+      "sourcePath": "examples/references/main.go",
+      "availability": "source-workspace",
+      "versions": {
+        "github.com/looprig/secrets": "source-workspace"
+      },
+      "offlineCommand": "GOWORK=off go run ./examples/references",
+      "assertion": "The scheme is normalized to local, the opaque path is preserved, and the namespace contains the reference.",
+      "workflowPath": ".github/workflows/docs-examples.yml",
+      "jobId": "docs-examples",
+      "cleanup": "No persistent resources are created, so no cleanup is required.",
+      "liveGate": null,
+      "proofIds": [
+        "example-secrets-references-source",
+        "example-secrets-command-test"
+      ]
+    },
+    {
+      "id": "example-secrets-local-store-command",
+      "title": "Run the local secret store lifecycle",
+      "ecosystem": "go",
+      "owner": "secrets",
+      "sourcePath": "examples/local-store/main.go",
+      "availability": "source-workspace",
+      "versions": {
+        "github.com/looprig/secrets": "source-workspace"
+      },
+      "offlineCommand": "GOWORK=off go run ./examples/local-store",
+      "assertion": "Create-only put, resolve, compare-and-swap update, metadata listing, conditional delete, and idempotent delete all succeed.",
+      "workflowPath": ".github/workflows/docs-examples.yml",
+      "jobId": "docs-examples",
+      "cleanup": "The program removes its temporary owner-only store after closing it.",
+      "liveGate": null,
+      "proofIds": [
+        "example-secrets-local-store-source",
+        "example-secrets-command-test"
+      ]
+    },
+    {
+      "id": "example-secrets-store-contract-command",
+      "title": "Apply the reusable store contract to a backend",
+      "ecosystem": "go",
+      "owner": "secrets",
+      "sourcePath": "examples/contracttest/store_test.go",
+      "availability": "source-workspace",
+      "versions": {
+        "github.com/looprig/secrets": "source-workspace"
+      },
+      "offlineCommand": "GOWORK=off go test ./examples/contracttest -run '^TestLocalStoreContract$' -count=1",
+      "assertion": "The local backend passes the reusable store contract with create-only, compare-and-swap, version, and listing requirements enabled.",
+      "workflowPath": ".github/workflows/docs-examples.yml",
+      "jobId": "docs-examples",
+      "cleanup": "The Go test harness removes each temporary store registered with t.TempDir.",
+      "liveGate": null,
+      "proofIds": [
+        "example-secrets-store-contract-test",
+        "example-secrets-command-test"
+      ]
+    }
+  ]
+}

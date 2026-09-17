@@ -7,12 +7,28 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"golang.org/x/sys/unix"
 
 	"github.com/looprig/secrets"
 )
+
+func TestIdentityPreservesNativeStatFields(t *testing.T) {
+	if runtime.GOOS != "darwin" {
+		t.Skip("Darwin's signed dev_t is the conversion regression")
+	}
+	stat := &unix.Stat_t{Dev: 42, Ino: 99}
+	got := identity(stat)
+	if !reflect.DeepEqual(got.dev, stat.Dev) {
+		t.Fatalf("identity device = %#v (%T), want native %#v (%T)", got.dev, got.dev, stat.Dev, stat.Dev)
+	}
+	if !reflect.DeepEqual(got.ino, stat.Ino) {
+		t.Fatalf("identity inode = %#v (%T), want native %#v (%T)", got.ino, got.ino, stat.Ino, stat.Ino)
+	}
+}
 
 func TestUnixReadPermissionErrorClosesOpenedDescriptor(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "secrets")

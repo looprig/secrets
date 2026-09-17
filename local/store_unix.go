@@ -27,8 +27,13 @@ type unixPlatform struct {
 }
 
 type fileIdentity struct {
-	dev uint64
-	ino uint64
+	// Keep the native Stat_t field types. Darwin's dev_t is signed int32,
+	// while Linux uses an unsigned type; converting either ABI field into a
+	// shared unsigned width can trigger overflow or sign-extension concerns.
+	// These values are only compared within this process and are all scalar,
+	// comparable stat fields.
+	dev any
+	ino any
 }
 
 func openPlatform(root string) (platform, error) {
@@ -510,13 +515,13 @@ func (u *unixPlatform) names(limit int) ([]string, error) {
 func (u *unixPlatform) syncDir() error { return unix.Fsync(u.rootFD) }
 
 func identity(st *unix.Stat_t) fileIdentity {
-	return fileIdentity{dev: uint64(st.Dev), ino: uint64(st.Ino)}
+	return fileIdentity{dev: st.Dev, ino: st.Ino}
 }
 
 func isOwnerOnlyRegular(st *unix.Stat_t) bool {
-	return st.Mode&unix.S_IFMT == unix.S_IFREG && uint32(st.Mode&0o7777) == 0o600 && uint32(st.Uid) == uint32(os.Getuid()) && uint64(st.Nlink) == 1
+	return st.Mode&unix.S_IFMT == unix.S_IFREG && uint32(st.Mode&0o7777) == 0o600 && int64(st.Uid) == int64(os.Getuid()) && uint64(st.Nlink) == 1
 }
 
 func isOwnerOnlyDirectory(st *unix.Stat_t) bool {
-	return st.Mode&unix.S_IFMT == unix.S_IFDIR && uint32(st.Mode&0o7777) == 0o700 && uint32(st.Uid) == uint32(os.Getuid())
+	return st.Mode&unix.S_IFMT == unix.S_IFDIR && uint32(st.Mode&0o7777) == 0o700 && int64(st.Uid) == int64(os.Getuid())
 }

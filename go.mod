@@ -1,5 +1,5 @@
 module github.com/looprig/secrets
 
-go 1.26.6
+go 1.26.8
 
 require golang.org/x/sys v0.47.0

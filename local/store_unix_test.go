@@ -30,6 +30,28 @@ func TestIdentityPreservesNativeStatFields(t *testing.T) {
 	}
 }
 
+func TestUIDMatchesPreserves32BitPattern(t *testing.T) {
+	tests := []struct {
+		name       string
+		statUID    uint32
+		processUID int
+		want       bool
+	}{
+		{name: "ordinary uid", statUID: 1000, processUID: 1000, want: true},
+		{name: "high bit uid sign extended", statUID: 0x80000000, processUID: -2147483648, want: true},
+		{name: "all bits uid sign extended", statUID: 0xffffffff, processUID: -1, want: true},
+		{name: "different high bit uid", statUID: 0x80000000, processUID: -1, want: false},
+		{name: "negative uid is not ordinary uid", statUID: 1000, processUID: -1, want: false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := uidMatches(tc.statUID, tc.processUID); got != tc.want {
+				t.Fatalf("uidMatches(%#x, %d) = %t, want %t", tc.statUID, tc.processUID, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestUnixReadPermissionErrorClosesOpenedDescriptor(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "secrets")
 	store, err := New(root)

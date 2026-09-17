@@ -518,10 +518,16 @@ func identity(st *unix.Stat_t) fileIdentity {
 	return fileIdentity{dev: st.Dev, ino: st.Ino}
 }
 
+func uidMatches(statUID uint32, processUID int) bool {
+	// On 32-bit Unix, os.Getuid returns an int32-shaped value. Preserve its
+	// 32-bit UID bit pattern when a high-bit UID is sign-extended to int64.
+	return int64(statUID) == (int64(processUID) & 0xffffffff)
+}
+
 func isOwnerOnlyRegular(st *unix.Stat_t) bool {
-	return st.Mode&unix.S_IFMT == unix.S_IFREG && uint32(st.Mode&0o7777) == 0o600 && int64(st.Uid) == int64(os.Getuid()) && uint64(st.Nlink) == 1
+	return st.Mode&unix.S_IFMT == unix.S_IFREG && uint32(st.Mode&0o7777) == 0o600 && uidMatches(st.Uid, os.Getuid()) && uint64(st.Nlink) == 1
 }
 
 func isOwnerOnlyDirectory(st *unix.Stat_t) bool {
-	return st.Mode&unix.S_IFMT == unix.S_IFDIR && uint32(st.Mode&0o7777) == 0o700 && int64(st.Uid) == int64(os.Getuid())
+	return st.Mode&unix.S_IFMT == unix.S_IFDIR && uint32(st.Mode&0o7777) == 0o700 && uidMatches(st.Uid, os.Getuid())
 }

@@ -25,3 +25,5 @@ jobs:
         run: GOWORK=off go test ./examples/contracttest -run '^TestLocalStoreContract$' -count=1
       - name: Run race suite
         run: GOWORK=off go test -race ./...
+      - name: Run repository checks
+        run: GOWORK=off make check

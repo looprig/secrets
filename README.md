@@ -87,7 +87,7 @@ dependents are `credentials`, `inference` and `llm`.
 
 ## Development
 
-The Go baseline is 1.26.8. Verify the module standalone:
+The Go baseline is 1.26.9. Verify the module standalone:
 
 ```sh
 GOWORK=off go test ./...
